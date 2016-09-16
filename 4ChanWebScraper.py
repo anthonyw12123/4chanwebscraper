@@ -32,7 +32,7 @@ def createFolderName(webpageTitle):
     return outputString
 
 def validateUrl(url):
-    pattern = r'^(https?://)?(www\.)?4chan'
+    pattern = r'^(https?://)?(www\.)?4chan\.'
     if( re.match(pattern, url, re.I)):
         return url
     else:
