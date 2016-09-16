@@ -47,7 +47,6 @@ if __name__ == '__main__':
     parser.add_argument('url',nargs='+', type=validateUrl, help='a list, separated by spaces, of web addresses to be parsed')
     parser.add_argument('-v', help='verbose. Turn on debug output.', action='store_true', dest='verbose')
     args = parser.parse_args()
-    exit(0)
 
     from BeautifulSoup import BeautifulSoup
     import requests
