@@ -31,16 +31,24 @@ def createFolderName(webpageTitle):
     outputString = splitString[0].strip().upper() + ' - ' + normalize_whitespace(splitString[1]).lower().title()
     return outputString
 
+def validateUrl(url):
+    pattern = r'^(https?://)?(www\.)?4chan'
+    if( re.match(pattern, url, re.I)):
+        return url
+    else:
+        msg = "URLs must be for a 4chan domain!"
+        raise argparse.ArgumentTypeError(msg)
 
 if __name__ == '__main__':
     import argparse
-    
+    import re
+
     parser = argparse.ArgumentParser(description='Process a 4chan thread to scrape all images from.')
-    parser.add_argument('url',nargs='+', help='a list, separated by spaces, of web addresses to be parsed')
+    parser.add_argument('url',nargs='+', type=validateUrl, help='a list, separated by spaces, of web addresses to be parsed')
     parser.add_argument('-v', help='verbose. Turn on debug output.', action='store_true', dest='verbose')
     args = parser.parse_args()
+    exit(0)
 
-    import re
     from BeautifulSoup import BeautifulSoup
     import requests
     from StringIO import StringIO
