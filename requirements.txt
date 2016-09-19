@@ -1,0 +1,5 @@
+BeautifulSoup==3.2.1
+Django==1.10.1
+image==1.5.4
+Pillow==3.3.1
+requests==2.11.1
