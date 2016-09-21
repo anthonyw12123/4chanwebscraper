@@ -2,10 +2,10 @@
 #this fails on .WEBM or other media
 def downloadImage(url,path):
     import requests
-    from PIL import Image
-    img = requests.get(url)
-    i = Image.open(StringIO(img.content))
-    i.save(path)
+    #from PIL import Image
+    with open(path,"wb") as file:
+        response = requests.get(url)
+        file.write(response.content)
 
 #Checks if input folder exists in the current directory. If not, create it.
 def checkFolderExists(folder, verbose):
@@ -83,7 +83,7 @@ if __name__ == '__main__':
                     if args.verbose:
                         print('Saving from http:' + imageName)
                         print('No previous file exists. Saving to ' + savePath)
-                        print('Saving files: ' + str(args.nosave) )
+                        print('Saving files: ' + str(args.save) )
                     if args.save:
                         downloadImage('http:'+imageName,savePath)
                 else:
@@ -103,5 +103,6 @@ if __name__ == '__main__':
                 else:
                     if args.verbose:
                         print(fileName+ ' found. Skipping.')
-        
         print('Finished processing thread!')
+            
+        
