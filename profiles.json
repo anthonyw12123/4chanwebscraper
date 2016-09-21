@@ -1,0 +1,12 @@
+{
+    "4chan": {
+        "urlPattern":"^(https?://)?(www\\.)?(boards\\.)?4chan\\.",
+        "imagePattern":"\\d+\\.\\w+$",
+        "folder":null
+        },
+    "example": {
+        "urlPattern":"regex.example.com",
+        "imagePattern":"regex",
+        "folder":"path/to/store/images"
+        }
+}
