@@ -1,5 +1,4 @@
 #downloads an IMAGE to the provided path. 
-#this fails on .WEBM or other media
 def downloadImage(url,path):
     import requests
     #from PIL import Image
@@ -13,23 +12,16 @@ def validateFolder(string):
     if len(name) == 0:
         msg = 'Empty directory path supplied. Please supply a directory.'
         raise argparse.ArgumentTypeError(msg)
-    if name[0] == '~':
-        if not os.path.exists(os.path.expanduser(str)):
-            msg = 'Invalid directory supplied. Please supply an existing directory.'
-            raise argparse.ArgumentTypeError(msg)
-    if not os.path.exists(os.path.abspath(name)):
-        msg = 'Invalid directory supplied. Please supply an existing directory.'
-        raise argparse.ArgumentTypeError(msg)
     return name
 
 #Checks if input folder exists in the appropriate directory. If not, create it.
 def getFolder(folder, verbose, dest):
     output = ' '
-    if len(dest) > 0:
+    if dest is not None:
         if dest[0] == '~':
             output = os.path.join(os.path.expanduser(dest), folder)
         else:
-            output = os.path.abspath(os.path.join(dest,folder))
+            output = os.path.join(os.path.abspath(dest),folder)
     else:
         output = os.path.join(os.getcwd(), folder)
     if not os.path.exists(output):
