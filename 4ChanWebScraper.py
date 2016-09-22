@@ -7,16 +7,36 @@ def downloadImage(url,path):
         response = requests.get(url)
         file.write(response.content)
 
-#Checks if input folder exists in the current directory. If not, create it.
-def checkFolderExists(folder, verbose):
-    import os
-    if not os.path.exists('./' + folder):
-        os.makedirs('./'+folder)
-        if verbose:
-            print('created folder '+ folder)
+#data validation for directory output argument
+def validateFolder(string):
+    name = str(string)
+    if len(name) == 0:
+        msg = 'Empty directory path supplied. Please supply a directory.'
+        raise argparse.ArgumentTypeError(msg)
+    if name[0] == '~':
+        if not os.path.exists(os.path.expanduser(str)):
+            msg = 'Invalid directory supplied. Please supply an existing directory.'
+            raise argparse.ArgumentTypeError(msg)
+    if not os.path.exists(os.path.abspath(name)):
+        msg = 'Invalid directory supplied. Please supply an existing directory.'
+        raise argparse.ArgumentTypeError(msg)
+    return name
+
+#Checks if input folder exists in the appropriate directory. If not, create it.
+def getFolder(folder, verbose, dest):
+    output = ' '
+    if len(dest) > 0:
+        if dest[0] == '~':
+            output = os.path.join(os.path.expanduser(dest), folder)
+        else:
+            output = os.path.abspath(os.path.join(dest,folder))
     else:
+        output = os.path.join(os.getcwd(), folder)
+    if not os.path.exists(output):
+        os.makedirs(output)
         if verbose:
-            print('folder already exists')
+            print('Created ' + output)
+    return output
 
 #uses re to normalize spaces for generating a folder name.
 def normalize_whitespace(str):
@@ -42,9 +62,11 @@ def validateUrl(url):
 if __name__ == '__main__':
     import argparse
     import re
+    import os
 
     parser = argparse.ArgumentParser(description='Process a 4chan thread to scrape all images from.')
     parser.add_argument('url',nargs='+', type=validateUrl, help='a list, separated by spaces, of web addresses to be parsed')
+    parser.add_argument('-d', type=validateFolder, help='Specify a directory to output files to.', dest='dest')
     parser.add_argument('-v', help='verbose. Turn on debug output.', action='store_true', dest='verbose')
     parser.add_argument('-ns', help='No saving. This disables actually modifying the filesystem.', action='store_false', dest='save')
     args = parser.parse_args()
@@ -65,7 +87,7 @@ if __name__ == '__main__':
 
         folderName = createFolderName(soup.title.string.replace('/',''))
 
-        checkFolderExists(folderName, args.verbose)
+        folder = getFolder(folderName, args.verbose, args.dest)
         if args.verbose:
             print('Capturing ' + folderName)
         
@@ -76,7 +98,8 @@ if __name__ == '__main__':
             title = link.a.get('title')
             #save the title as the filename
             if title is not None:
-                savePath = './'+folderName+'/'+title
+                #savePath = './'+folderName+'/'+title
+                savePath = os.path.join(folder,title)
                 if args.verbose:
                     print('Title is found. Using it as filename; ' + title)
                 if not os.path.isfile(savePath):
@@ -94,7 +117,7 @@ if __name__ == '__main__':
                 fileName = re.search('\d+\.\w+$',imageName).group(0)
                 if args.verbose:
                     print('Title not found. Using filepath as filename;  ' + fileName)
-                savePath = './'+ folderName +'/' + fileName
+                savePath = os.path.join(folder,fileName)
                 if args.verbose:
                     print('saving:' + savePath)
                 if not os.path.isfile(savePath):
@@ -102,7 +125,7 @@ if __name__ == '__main__':
                         downloadImage('http:'+imageName,savePath)
                 else:
                     if args.verbose:
-                        print(fileName+ ' found. Skipping.')
+                        print(savePath+ ' found. Skipping.')
         print('Finished processing thread!')
             
         
