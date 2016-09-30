@@ -1,13 +1,10 @@
-def log(string, verbose):
-    if verbose:
-        print(string)
-
 #downloads an IMAGE to the provided path. 
 def downloadImage(url,path):
     import requests
     #from PIL import Image
     with open(path,"wb") as file:
         response = requests.get(url)
+        logging.info('Writing '+ path)
         file.write(response.content)
 
 #data validation for directory output argument
@@ -30,7 +27,7 @@ def getFolder(folder, verbose, dest):
         output = os.path.join(os.getcwd(), folder)
     if not os.path.exists(output):
         os.makedirs(output)
-        log('Created ' + output)
+        logging.info('Created ' + output)
     return output
 
 #uses re to normalize spaces for generating a folder name.
@@ -72,9 +69,11 @@ if __name__ == '__main__':
     import requests
     from StringIO import StringIO
     import os
+    import logging
+    logging.basicConfig(filename='logfile.log', level=logging.DEBUG)
 
     for link in args.url:
-        log('Processing '+link)
+        logging.info('Processing '+link)
 
         response = requests.get(link)
         html = response.content
@@ -84,38 +83,38 @@ if __name__ == '__main__':
         folderName = createFolderName(soup.title.string.replace('/',''))
 
         folder = getFolder(folderName, args.verbose, args.dest)
-        log('Capturing ' + folderName)
+        logging.info('Capturing ' + folderName)
         
         for link in soup.findAll('div','fileText'): 
             imageName = link.a.get('href')
-            log('Processing ' + imageName)
+            logging.info('Processing ' + imageName)
             title = link.a.get('title')
             #save the title as the filename
             if title is not None:
                 #savePath = './'+folderName+'/'+title
                 savePath = os.path.join(folder,title)
-                log('Title is found. Using it as filename; ' + title)
+                logging.info('Title is found. Using it as filename; ' + title)
                 if not os.path.isfile(savePath):
                     if args.verbose:
-                        log('Saving from http:' + imageName)
-                        log('No previous file exists. Saving to ' + savePath)
-                        log('Saving files: ' + str(args.save) )
+                        logging.info('Saving from http:' + imageName)
+                        logging.info('No previous file exists. Saving to ' + savePath)
+                        logging.info('Saving files: ' + str(args.save) )
                     if args.save:
                         downloadImage('http:'+imageName,savePath)
                 else:
-                    log('File exists. Skipping it.')
+                    logging.info('File exists. Skipping it.')
 
             #save the filename as the filename 
             else:
                 fileName = re.search('\d+\.\w+$',imageName).group(0)
-                log('Title not found. Using filepath as filename;  ' + fileName)
+                logging.info('Title not found. Using filepath as filename;  ' + fileName)
                 savePath = os.path.join(folder,fileName)
-                log('saving:' + savePath)
+                logging.info('saving:' + savePath)
                 if not os.path.isfile(savePath):
                     if args.save:
                         downloadImage('http:'+imageName,savePath)
                 else:
-                    log(savePath+ ' found. Skipping.')
-        log('Finished processing thread!')
+                    logging.info(savePath+ ' found. Skipping.')
+        logging.info('Finished processing thread!')
             
         
