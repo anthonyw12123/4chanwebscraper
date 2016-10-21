@@ -70,7 +70,12 @@ if __name__ == '__main__':
     from StringIO import StringIO
     import os
     import logging
+    import logging.config
+
+    logging.config.fileConfig('logging.conf')
+    
     logging.basicConfig(filename='logfile.log', level=logging.DEBUG)
+    logging.Formatter.__init__(fmt='%(asctime)s - %(levelname)s - %(message)s', datefmt='%Y-%m-%d %H:%M:%S')
 
     for link in args.url:
         logging.info('Processing '+link)
