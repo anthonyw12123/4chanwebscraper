@@ -1,13 +1,13 @@
 # Purpose
 
-This project is an attempt to craft a clean, easy to understand 
-implementation of a scraper for 4chan. 
+This project is an attempt to craft a clean, easy to understand
+implementation of a scraper for 4chan.
 
 # Requirements
-virtualenv is recommended for this project, to install all the 
+virtualenv is recommended for this project, to install all the
 dependencies of the project in a virtual environment.
 
-## Usage 
+## Usage
 In linux, the command is;
 ```
 sudo pip install virtualenv
