@@ -2,7 +2,7 @@ def log(string, verbose):
     if verbose:
         print(string)
 
-#downloads an IMAGE to the provided path. 
+#downloads an IMAGE to the provided path.
 def downloadImage(url,path):
     import requests
     #from PIL import Image
@@ -30,7 +30,7 @@ def getFolder(folder, verbose, dest):
         output = os.path.join(os.getcwd(), folder)
     if not os.path.exists(output):
         os.makedirs(output)
-        log('Created ' + output)
+        log('Created ' + output, verbose)
     return output
 
 #uses re to normalize spaces for generating a folder name.
@@ -64,7 +64,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Process a 4chan thread to scrape all images from.')
     parser.add_argument('url',nargs='+', type=validateUrl, help='a list, separated by spaces, of web addresses to be parsed')
     parser.add_argument('-d', type=validateFolder, help='Specify a directory to output files to.', dest='dest')
-    parser.add_argument('-v', help='verbose. Turn on debug output.', action='store_true', dest='verbose')
+    parser.add_argument('-v', help='verbose. Turn on debug output.', action='store_true', dest='verbose', default=False)
     parser.add_argument('-ns', help='No saving. This disables actually modifying the filesystem.', action='store_false', dest='save')
     args = parser.parse_args()
 
@@ -74,7 +74,7 @@ if __name__ == '__main__':
     import os
 
     for link in args.url:
-        log('Processing '+link)
+        log('Processing '+link, args.verbose)
 
         response = requests.get(link)
         html = response.content
@@ -84,38 +84,36 @@ if __name__ == '__main__':
         folderName = createFolderName(soup.title.string.replace('/',''))
 
         folder = getFolder(folderName, args.verbose, args.dest)
-        log('Capturing ' + folderName)
-        
-        for link in soup.findAll('div','fileText'): 
+        log('Capturing ' + folderName, args.verbose)
+
+        for link in soup.findAll('div','fileText'):
             imageName = link.a.get('href')
-            log('Processing ' + imageName)
+            log('Processing ' + imageName, args.verbose)
             title = link.a.get('title')
             #save the title as the filename
             if title is not None:
                 #savePath = './'+folderName+'/'+title
                 savePath = os.path.join(folder,title)
-                log('Title is found. Using it as filename; ' + title)
+                log('Title is found. Using it as filename; ' + title, args.verbose)
                 if not os.path.isfile(savePath):
                     if args.verbose:
-                        log('Saving from http:' + imageName)
-                        log('No previous file exists. Saving to ' + savePath)
-                        log('Saving files: ' + str(args.save) )
+                        log('Saving from http:' + imageName, args.verbose)
+                        log('No previous file exists. Saving to ' + savePath, args.verbose)
+                        log('Saving files: ' + str(args.save) , args.verbose)
                     if args.save:
                         downloadImage('http:'+imageName,savePath)
                 else:
-                    log('File exists. Skipping it.')
+                    log('File exists. Skipping it.', args.verbose)
 
-            #save the filename as the filename 
+            #save the filename as the filename
             else:
                 fileName = re.search('\d+\.\w+$',imageName).group(0)
-                log('Title not found. Using filepath as filename;  ' + fileName)
+                log('Title not found. Using filepath as filename;  ' + fileName, args.verbose)
                 savePath = os.path.join(folder,fileName)
-                log('saving:' + savePath)
+                log('saving:' + savePath, args.verbose)
                 if not os.path.isfile(savePath):
                     if args.save:
                         downloadImage('http:'+imageName,savePath)
                 else:
-                    log(savePath+ ' found. Skipping.')
-        log('Finished processing thread!')
-            
-        
+                    log(savePath+ ' found. Skipping.', args.verbose)
+        log('Finished processing thread!', args.verbose)
