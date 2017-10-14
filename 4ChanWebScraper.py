@@ -3,12 +3,19 @@ def log(string, verbose):
         print(string)
 
 #downloads an IMAGE to the provided path.
-def downloadImage(url,path):
+def downloadImage(url, path, verbose):
     import requests
     #from PIL import Image
-    with open(path,"wb") as file:
-        response = requests.get(url)
-        file.write(response.content)
+    if url.startswith('http'):
+        log('Link contains http already: '+url, verbose)
+        with open(path,"wb") as file:
+            response = requests.get(url.replace('https://','http://'))
+            file.write(response.content)
+    else:
+        log('Prepending \'http:\' to url: '+url, verbose)
+        with open(path,"wb") as file:
+            response = requests.get('http:'+url)
+            file.write(response.content)
 
 #data validation for directory output argument
 def validateFolder(string):
@@ -47,9 +54,9 @@ def createFolderName(webpageTitle):
     return outputString
 
 def validateUrl(url):
-    pattern = r'^(https?://)?(www\.)?(boards\.)?4chan\.'
+    pattern = r'^(https?://)?(www\.)?(boards\.)?(4chan|4archive)\.'
     if( re.match(pattern, url, re.I)):
-        return url
+        return url.replace('https://','http://')
     else:
         msg = "URLs must be for a 4chan domain!"
         raise argparse.ArgumentTypeError(msg)
@@ -97,11 +104,11 @@ if __name__ == '__main__':
                 log('Title is found. Using it as filename; ' + title, args.verbose)
                 if not os.path.isfile(savePath):
                     if args.verbose:
-                        log('Saving from http:' + imageName, args.verbose)
+                        log('Saving link:' + imageName, args.verbose)
                         log('No previous file exists. Saving to ' + savePath, args.verbose)
                         log('Saving files: ' + str(args.save) , args.verbose)
                     if args.save:
-                        downloadImage('http:'+imageName,savePath)
+                        downloadImage(imageName,savePath, args.verbose)
                 else:
                     log('File exists. Skipping it.', args.verbose)
 
@@ -113,7 +120,7 @@ if __name__ == '__main__':
                 log('saving:' + savePath, args.verbose)
                 if not os.path.isfile(savePath):
                     if args.save:
-                        downloadImage('http:'+imageName,savePath)
+                        downloadImage('http:'+imageName,savePath, args.verbose)
                 else:
                     log(savePath+ ' found. Skipping.', args.verbose)
         log('Finished processing thread!', args.verbose)
